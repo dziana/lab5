@@ -12,10 +12,8 @@ char *sql;
 int id = -1;
 int isAdmin = -1;
 static int callback_login(void *NotUsed, int argc, char **argv, char **azColName) {
-	if(argc != 0) {
-		id = atoi(argv[0]);
-		isAdmin = atoi(argv[1]);
-	}
+	id = atoi(argv[0]);
+	isAdmin = atoi(argv[1]);
 	return 0;
 }
 
@@ -24,41 +22,26 @@ char type[16];
 char balance[40];
 char overdraft[16];
 static int callback_exist(void *NotUsed, int argc, char **argv, char **azColName) {
-	if(argc != 0)
-		idExist = 1;
-	else
-		idExist = 0;
+	idExist = 1;
 	return 0;
 }
 
 static int callback_client_overdraft(void *NotUsed, int argc, char **argv, char **azColName) {
-	if(argc != 0) {
 		idExist = 1;
 		strcpy(overdraft, argv[0]);
-	}
-	else
-		idExist = 0;
-	return 0;
+		return 0;
 }
 
 static int callback_account_type(void *NotUsed, int argc, char **argv, char **azColName) {
-	if(argc != 0) {
 		idExist = 1;
 		strcpy(type, argv[0]);
-	}
-	else
-		idExist = 0;
-	return 0;
+		return 0;
 }
 
 static int callback_account_balance(void *NotUsed, int argc, char **argv, char **azColName) {
-	if(argc != 0) {
 		idExist = 1;
 		strcpy(balance, argv[0]);
-	}
-	else
-		idExist = 0;
-	return 0;
+		return 0;
 }
 
 
