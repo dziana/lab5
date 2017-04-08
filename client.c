@@ -15,8 +15,6 @@ char clientId;
 double accountBalance;
 char accountType[16];
 static int callback_account(void *NotUsed, int argc, char **argv, char **azColName) {
-	if(argc == 0) 
-		return 0;
 	accountExist = 1;
 	clientId = atoi(argv[0]);
 	accountBalance = atof(argv[1]);

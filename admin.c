@@ -11,6 +11,13 @@ char *sql;
 
 int id = -1;
 int isAdmin = -1;
+char accountId[16];
+
+static int callback_accountId(void *NotUsed, int argc, char **argv, char **azColName) {
+	strcpy(accountId, argv[0]);
+	return 0;
+}
+
 static int callback_login(void *NotUsed, int argc, char **argv, char **azColName) {
 	id = atoi(argv[0]);
 	isAdmin = atoi(argv[1]);
@@ -30,6 +37,10 @@ static int callback_client_overdraft(void *NotUsed, int argc, char **argv, char 
 		idExist = 1;
 		strcpy(overdraft, argv[0]);
 		return 0;
+}
+
+static int callback_clientId(void *result, int argc, char **argv, char **azColoName) {
+		result = atoi(argv[0]);
 }
 
 static int callback_account_type(void *NotUsed, int argc, char **argv, char **azColName) {
@@ -58,6 +69,7 @@ void startOperatorMenu();
 void depositMoneyOnCard();
 void performTranslationBetweenAccounts();
 int getPhoto(char* photo, int *size);
+int getTransactionFee(char* id);
 
 int isNumber(char* str);
 int isFloat(char* str);
@@ -107,7 +119,7 @@ int main(int argc, char* argv[]) {
 void startMainMenu() {
 	while(1) {
 		system("clear");
-   		printf("Welcom to BitBank.\n");
+   		printf("Welcome to BitBank.\n");
 		printf("0. Exit\n1. Log in\n");
 		int ans = choice();
         switch (ans) {
@@ -138,7 +150,7 @@ void logIn() {
 			gets(pass);
 			char sqlQuery[256];
 			sprintf(sqlQuery, "SELECT id, isAdmin from BANK_USERS WHERE login='%s' and password='%s'", login, pass);
-			rc = sqlite3_exec(db, sqlQuery, callback_login, "asd", &zErrMsg);
+			rc = sqlite3_exec(db, sqlQuery, callback_login, NULL, &zErrMsg);
 			if(id != -1) {
 					switch (isAdmin) {
 							case 1:
@@ -228,12 +240,21 @@ void addAccount() {
             return;
         }
 
-        printf("Account type: ");
-		gets(accountType);
-        if (accountType[0] == '\0') {
-            printf("Cancel.\n");
-            return;
-        }
+        printf("Account type:\n");
+		printf("1. Current\n");
+		printf("2. Savings\n");
+		int ans = choice();
+		switch(ans) {
+			case 1:
+				strcpy(accountType, "Current");
+				break;
+			case 2:
+				strcpy(accountType, "Savings");
+				break;
+			default:
+            	printf("Cancel.\n");
+            	return;
+		}
 
         printf("Password: ");
 		gets(password);
@@ -246,6 +267,9 @@ void addAccount() {
 		sprintf(sqlQuery, "insert into BANK_ACCOUNTS (clientID, balance, type, password) values('%s', '%s', '%s', '%s')", clientId, balance, accountType, password);
 
 	    rc = sqlite3_exec(db, sqlQuery, NULL, NULL, &zErrMsg);
+		sprintf(sqlQuery, "SELECT MAX(id) from BANK_ACCOUNTS");
+		rc = sqlite3_exec(db, sqlQuery, callback_accountId, NULL, &zErrMsg);
+		printf("AccoutntId: %s\n", accountId);
     } while (again());
 }
 
@@ -421,6 +445,9 @@ void performTranslationBetweenAccounts() {
 			enterReturn();
 			return;
 		}
+		int commission;
+		commission = getTransactionFee(inputIdFrom);
+
 		sprintf(sqlQuery, "UPDATE BANK_ACCOUNTS SET balance=balance-%s WHERE id=%s", translationMoney, inputIdFrom);
 		rc = sqlite3_exec(db, sqlQuery, NULL, NULL, &zErrMsg);
 		sprintf(sqlQuery, "UPDATE BANK_ACCOUNTS SET balance=balance+%s WHERE id=%s", translationMoney, inputIdTo);
@@ -508,4 +535,14 @@ repeat:
 	return 1;
 }
 
+int getTransactionFee(char* accountId) {
+	char sqlQuery[256]; 
+	int clientId;
+	char maxNumTransaction[16];
 
+	sprintf(sqlQuery, "SELECT clientID from BANK_ACCOUNTS WHERE id=%s", accountId);
+	rc = sqlite3_exec(db, sqlQuery, callback_clientId, &clientId, &zErrMsg);
+	printf("%d", clientId);
+	getchar();
+	
+}
