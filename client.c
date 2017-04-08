@@ -93,6 +93,7 @@ void logIn() {
 	else {
 		printf("Wrong account number or password. Try again? (y/n) ");
 		scanf("%c", &ans);
+		getchar();
 	}
 	if(ans == 'y' || ans == 'Y')
 		goto login;

@@ -167,7 +167,8 @@ void logIn() {
 			}
 			else {
 					printf("Wrong login or password. Try again? (y/n) ");
-					ans = getchar();
+					scanf("%c", &ans);
+					getchar();
 			}
 	}
 	while(ans == 'y' || ans == 'Y');
